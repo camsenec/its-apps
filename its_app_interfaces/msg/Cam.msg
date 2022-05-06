@@ -1,0 +1,5 @@
+string station_id
+int64 generation_time
+int64 station_type
+int64 latitude
+int64 longitude

@@ -1,4 +1,4 @@
-# ITS Applications (its-apps)
+# ITS Applications (its_apps)
 Implementations of
 - CA (Cooperative Awareness)
 - DEN (Decentralized Environment Notification)

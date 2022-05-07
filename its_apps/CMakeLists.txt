@@ -70,6 +70,11 @@ if(BUILD_CERTIFY)
 	add_subdirectory(tools/certify)
 endif()
 
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(TARGET Cohda::headers)
   add_subdirectory(src/cohda_proxy)
 endif()

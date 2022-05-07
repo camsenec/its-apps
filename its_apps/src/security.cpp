@@ -89,7 +89,7 @@ public:
 
 
 std::unique_ptr<security::SecurityEntity>
-create_security_entity(const Runtime& runtime, const security_params& params, PositionProvider& positioning)
+create_security_entity(const Runtime& runtime, const SecurityParams& params, PositionProvider& positioning)
 {
     std::unique_ptr<security::SecurityEntity> security;
     std::string name = params.security;

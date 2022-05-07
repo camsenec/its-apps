@@ -32,7 +32,7 @@
 #include <boost/program_options/variables_map.hpp>
 #include <memory>
 
-struct security_params 
+struct SecurityParams 
 {
     std::string security;
     std::string certificate;
@@ -41,7 +41,7 @@ struct security_params
 };
 
 std::unique_ptr<vanetza::security::SecurityEntity>
-create_security_entity(const vanetza::Runtime&, const security_params&, vanetza::PositionProvider&);
+create_security_entity(const vanetza::Runtime&, const SecurityParams&, vanetza::PositionProvider&);
 
 #endif /* SECURITY_HPP_FV13ZIYA */
 

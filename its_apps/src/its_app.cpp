@@ -31,10 +31,10 @@
 #include "security.hpp"
 #include "time_trigger.hpp"
 #include "its_apps_interfaces/msg/cam.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/program_options.hpp>
-#include <rclcpp/rclcpp.hpp>
 #include <iostream>
 
 #ifdef ITS_APPS_WITH_GPSD

@@ -1,3 +1,22 @@
+#  (C) 2022 Tomoya Tanaka <deepsky2221@gmail.com> 
+# 
+#  This file is part of its_apps.
+# 
+#  its_apps is free software: you can redistribute it and/or modify it 
+#  under the terms of the GNU Lesser General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or 
+#  any later version.
+#  its_apps is distributed in the hope that it will be useful, 
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+#  See the GNU General Public License and 
+#  GNU Lesser General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License 
+#  and GNU Lesser General Public License along with its_apps. 
+#  If not, see <https://www.gnu.org/licenses/>. 
+
+
 cmake_minimum_required(VERSION 3.5)
 project(its_apps_interfaces)
 
@@ -31,7 +50,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 )
 
 ament_export_dependencies(rosidl_default_runtime)
-
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

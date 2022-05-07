@@ -43,10 +43,13 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Find project dependencies
 find_package(Cohda MODULE QUIET)
+find_package(OpenSSL QUIET)
+find_package(Vanetza 0.8 REQUIRED)
 
 # Find ROS dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(its_apps_interfaces REQUIRED)
 
 set(Boost_COMPONENTS date_time) # used by VanetzaConfig generator
 find_package(Boost 1.58 REQUIRED COMPONENTS ${Boost_COMPONENTS})
@@ -57,9 +60,6 @@ foreach(component IN ITEMS program_options system)
     list(APPEND Boost_COMPONENTS ${component})
   endif()
 endforeach()
-
-find_package(Vanetza 0.8 REQUIRED)
-find_package(Cohda MODULE QUIET)
 
 add_subdirectory(src)
 add_subdirectory(vanetza-extension/asn1)

@@ -25,6 +25,9 @@
  * State Changes
  * - Include file paths are changed.
  * - Several functions are removed and moved to functions.cpp.
+ * - Change the name of an argument (message -> cam) of print_intended function
+ *   and change the name of an variable (cam -> body) in print_intended function
+ * - Add get_basic_info function
  * 
 */
 
@@ -182,7 +185,21 @@ bool check_service_specific_permissions(const asn1::Cam& cam, vanetza::security:
     return ssp.has(required_permissions);
 }
 
-void print_indented(std::ostream& os, const asn1::Cam& message, const std::string& indent, unsigned level)
+void get_basic_info(const asn1::Cam& cam, its_apps_interfaces::msg::Cam& message)
+{   
+    const ItsPduHeader_t& header = cam->header;
+    message.station_id = header.stationID;
+
+    const CoopAwareness_t& body = cam->cam;
+    message.generation_time = body.generationDeltaTime;
+
+    const BasicContainer_t& basic = body.camParameters.basicContainer;
+    message.station_type = basic.stationType; 
+    message.longitude = basic.referencePosition.longitude;
+    message.latitude = basic.referencePosition.latitude;
+}
+
+void print_indented(std::ostream& os, const asn1::Cam& cam, const std::string& indent, unsigned level)
 {
     auto prefix = [&](const char* field) -> std::ostream& {
         for (unsigned i = 0; i < level; ++i) {
@@ -192,7 +209,7 @@ void print_indented(std::ostream& os, const asn1::Cam& message, const std::strin
         return os;
     };
 
-    const ItsPduHeader_t& header = message->header;
+    const ItsPduHeader_t& header = cam->header;
     prefix("ITS PDU Header") << "\n";
     ++level;
     prefix("Protocol Version") << header.protocolVersion << "\n";
@@ -200,14 +217,14 @@ void print_indented(std::ostream& os, const asn1::Cam& message, const std::strin
     prefix("Station ID") << header.stationID << "\n";
     --level;
 
-    const CoopAwareness_t& cam = message->cam;
+    const CoopAwareness_t& body = cam->cam;
     prefix("CoopAwarensess") << "\n";
     ++level;
-    prefix("Generation Delta Time") << cam.generationDeltaTime << "\n";
+    prefix("Generation Delta Time") << body.generationDeltaTime << "\n";
 
     prefix("Basic Container") << "\n";
     ++level;
-    const BasicContainer_t& basic = cam.camParameters.basicContainer;
+    const BasicContainer_t& basic = body.camParameters.basicContainer;
     prefix("Station Type") << basic.stationType << "\n";
     prefix("Reference Position") << "\n";
     ++level;
@@ -221,11 +238,11 @@ void print_indented(std::ostream& os, const asn1::Cam& message, const std::strin
     --level;
     --level;
 
-    if (cam.camParameters.highFrequencyContainer.present == HighFrequencyContainer_PR_basicVehicleContainerHighFrequency) {
+    if (body.camParameters.highFrequencyContainer.present == HighFrequencyContainer_PR_basicVehicleContainerHighFrequency) {
         prefix("High Frequency Container [Basic Vehicle]") << "\n";
         ++level;
         const BasicVehicleContainerHighFrequency& bvc =
-            cam.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency;
+            body.camParameters.highFrequencyContainer.choice.basicVehicleContainerHighFrequency;
         prefix("Heading [Confidence]") << bvc.heading.headingValue
             << " [" << bvc.heading.headingConfidence << "]\n";
         prefix("Speed [Confidence]") << bvc.speed.speedValue
@@ -242,10 +259,10 @@ void print_indented(std::ostream& os, const asn1::Cam& message, const std::strin
             << " [" << bvc.yawRate.yawRateConfidence << "]\n";
         --level;
     } else {
-        prefix("High Frequency Container") << cam.camParameters.highFrequencyContainer.present << "\n";
+        prefix("High Frequency Container") << body.camParameters.highFrequencyContainer.present << "\n";
     }
 
-    prefix("Low Frequency Container") << (cam.camParameters.lowFrequencyContainer ? "yes" : "no") << "\n";
+    prefix("Low Frequency Container") << (body.camParameters.lowFrequencyContainer ? "yes" : "no") << "\n";
     // TODO: print basic vehicle low frequency container in detail
     // TODO: print special vehicle container
     --level;

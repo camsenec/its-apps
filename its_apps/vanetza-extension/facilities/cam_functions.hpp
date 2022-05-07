@@ -25,13 +25,15 @@
  * State Changes
  * - Include file paths are changed.
  * - Several function definitions are removed and moved to functions.hpp.
- * 
+ * - Change the name of an argument (message -> cam) of print_intended function
+ * - Add get_basic_info function 
 */
 
 
 #ifndef CAM_FUNCTIONS_HPP_PUFKBEM8
 #define CAM_FUNCTIONS_HPP_PUFKBEM8
 
+#include "its_apps_interfaces/msg/cam.hpp"
 #include "vanetza-extension/asn1/its/Heading.h"
 #include <vanetza/security/cam_ssp.hpp>
 #include <vanetza/units/angle.hpp>
@@ -52,7 +54,6 @@ namespace facilities
 
 namespace cam
 {
-
 
 /**
  * Check if difference of two given heading values is within a limit
@@ -78,6 +79,15 @@ bool is_available(const Heading&);
  * \return true if no forbidden data elements are included
  */
 bool check_service_specific_permissions(const asn1::Cam& cam, vanetza::security::CamPermissions ssp);
+
+
+/**
+ * @brief Get the basic info to be published included in CAM
+ * 
+ * @param cam CA message
+ * @param message a message to be published
+ */
+void get_basic_info(const asn1::Cam& cam, its_apps_interfaces::msg::Cam& message);
 
 /**
  * Print CAM content with indentation of nested fields

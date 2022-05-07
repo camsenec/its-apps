@@ -1,9 +1,6 @@
 /* 
- * This file is modified
- * by Tomoya Tanaka <deepsky2221@gmail.com>
- * from <https://github.com/riebl/vanetza/blob/master/tools/socktap/cam_application.cpp>
- * at 2022-05-06.
- * 
+ * (C) 2022 Tomoya Tanaka <deepsky2221@gmail.com> 
+ *
  * This file is part of its_apps.
  *
  * its_apps is free software: you can redistribute it and/or modify it 
@@ -21,17 +18,13 @@
  * If not, see <https://www.gnu.org/licenses/>. 
  */
 
-/* 
- * State Changes
- * - Include file paths are changed.
-*/
-
-
 #include "cam_application.hpp"
 #include "vanetza-extension/asn1/cam.hpp"
 #include "vanetza-extension/facilities/functions.hpp"
 #include "vanetza-extension/facilities/cam_functions.hpp"
 #include "vanetza-extension/asn1/packet_visitor.hpp"
+#include "its_apps_interfaces/msg/cam.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <vanetza/geonet/data_request.hpp>
 #include <vanetza/geonet/tests/network_topology.hpp>
 #include <vanetza/btp/ports.hpp>
@@ -45,6 +38,8 @@
 // This is a very simple CA application sending CAMs at a fixed rate.
 using namespace vanetza;
 using namespace std::chrono;
+
+CamApplication::CamApplication(rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr publisher) : publisher_(publisher) {} 
 
 void CamApplication::print_received_message(bool flag)
 {
@@ -66,4 +61,10 @@ void CamApplication::indicate(const DataIndication& indication, UpPacketPtr pack
         std::cout << "Received CAM contains\n";
         vanetzaExtension::facilities::cam::print_indented(std::cout, *cam, "  ", 1);
     }
+}
+
+void CamApplication::publish(vanetzaExtension::asn1::Cam& cam){
+    auto message = its_apps_interfaces::msg::Cam();
+    vanetzaExtension::facilities::cam::get_basic_info(cam, message);
+    publisher_->publish(message);
 }

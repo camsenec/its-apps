@@ -1,9 +1,6 @@
 /* 
- * This file is copied
- * by Tomoya Tanaka <deepsky2221@gmail.com>
- * from <https://github.com/riebl/vanetza/blob/master/tools/socktap/cam_application.hpp>
- * at 2022-05-06.
- * 
+ * (C) 2022 Tomoya Tanaka <deepsky2221@gmail.com> 
+ *
  * This file is part of its_apps.
  *
  * its_apps is free software: you can redistribute it and/or modify it 
@@ -22,10 +19,14 @@
  */
 
 
-#ifndef CAM_APPLICATION_HPP_EUIC2VFR
-#define CAM_APPLICATION_HPP_EUIC2VFR
+#ifndef CAM_APPLICATION_HPP
+#define CAM_APPLICATION_HPP
 
+#include "its_app.hpp"
 #include "application.hpp"
+#include "its_apps_interfaces/msg/cam.hpp"
+#include "vanetza-extension/asn1/cam.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <vanetza/common/clock.hpp>
 #include <vanetza/common/position_provider.hpp>
 #include <vanetza/common/runtime.hpp>
@@ -34,13 +35,16 @@
 class CamApplication : public Application
 {
 public:
-    CamApplication() = default;
+    explicit CamApplication(rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr);
     PortType port() override;
     void indicate(const DataIndication&, UpPacketPtr) override;
+    void publish(vanetzaExtension::asn1::Cam&);
     void print_received_message(bool flag);
 
 private:
     bool print_rx_msg_ = false;
+    rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr publisher_;
+
 };
 
 #endif /* CAM_APPLICATION_HPP_EUIC2VFR */

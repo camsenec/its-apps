@@ -1,9 +1,6 @@
 /* 
- * This file is modified
- * by Tomoya Tanaka <deepsky2221@gmail.com>
- * from <https://github.com/riebl/vanetza/blob/master/tools/socktap/main.cpp>
- * at 2022-05-06.
- * 
+ * (C) 2022 Tomoya Tanaka <deepsky2221@gmail.com> 
+ *
  * This file is part of its_apps.
  *
  * its_apps is free software: you can redistribute it and/or modify it 
@@ -21,11 +18,6 @@
  * If not, see <https://www.gnu.org/licenses/>. 
  */
 
-/* 
- * State Changes
- * - Options are added.
- * - DEN, MAP and SPAT applications are added.
-*/
 
 #include "its_app.hpp"
 #include "ethernet_device.hpp"
@@ -38,6 +30,7 @@
 #include "router_context.hpp"
 #include "security.hpp"
 #include "time_trigger.hpp"
+#include "its_apps_interfaces/msg/cam.hpp"
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/program_options.hpp>
@@ -53,7 +46,7 @@ namespace gn = vanetza::geonet;
 namespace po = boost::program_options;
 using namespace vanetza;
 
-ItsApp::ItsApp() : Node("its_app_node")
+ItsApp::ItsApp() : Node("its_apps_node")
 {
     this->declare_parameter<std::string>("link-layer", "ethernet");
     this->declare_parameter<std::string>("interface", "lo");
@@ -73,16 +66,19 @@ ItsApp::ItsApp() : Node("its_app_node")
     this->declare_parameter<std::string>("gpsd_port", gpsd::default_port);
 #endif
 
+    rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr cam_publisher 
+        = this->create_publisher<its_apps_interfaces::msg::Cam>("cam_basic", 10);
 
     try {
         asio::io_service io_service;
         TimeTrigger trigger(io_service);
-
+        
+        // Initialize network interface
         std::string device_name; 
         this->get_parameter<std::string>("interface", device_name);
         EthernetDevice device(device_name.c_str());
-        vanetza::MacAddress mac_address = device.address();
 
+        // Initialize link layer 
         std::string link_layer_name;
         this->get_parameter<std::string>("link-layer", link_layer_name);
         
@@ -92,25 +88,15 @@ ItsApp::ItsApp() : Node("its_app_node")
             return;
         }
 
-        auto signal_handler = [&io_service](const boost::system::error_code& ec, int signal_number) {
-            if (!ec) {
-                std::cout << "Termination requested." << std::endl;
-                io_service.stop();
-            }
-        };
-        asio::signal_set signals(io_service, SIGINT, SIGTERM);
-        signals.async_wait(signal_handler);
-
-        // configure management information base
-        // TODO: make more MIB options configurable by command line flags
+        // Configure management information base
         gn::MIB mib;
-        mib.itsGnLocalGnAddr.mid(mac_address);
+        mib.itsGnLocalGnAddr.mid(device.address());
         mib.itsGnLocalGnAddr.is_manually_configured(true);
         mib.itsGnLocalAddrConfMethod = geonet::AddrConfMethod::Managed;
         mib.itsGnSecurity = false;
         mib.itsGnProtocolVersion = 1;
 
-        // Read positioning related params
+        // Initialize position provider
         std::string positioning;
         double latitude;
         double longitude;
@@ -119,7 +105,7 @@ ItsApp::ItsApp() : Node("its_app_node")
         this->get_parameter("latitude", latitude);
         this->get_parameter("longitude", longitude);
         this->get_parameter("pos_confidence" ,pos_confidence);
-        position_params position_params = {positioning, latitude, longitude, pos_confidence};
+        PositionParams position_params = {positioning, latitude, longitude, pos_confidence};
 #ifdef ITS_APPS_WITH_GPSD
         std::string gpsd_host;
         std::string gpsd_port;
@@ -127,14 +113,13 @@ ItsApp::ItsApp() : Node("its_app_node")
         this->get_parameter<std::string>("gpsd_port", gpsd_port);
         position_params = {positioning, latitude, longitude, pos_confidence, gpsd_host, gpsd_port};
 #endif
-
         auto position_provider = create_position_provider(io_service, position_params, trigger.runtime());
         if (!position_provider) {
             std::cerr << "Requested positioning method is not available\n";
             return;
         }
-        
-        // Read security related params
+         
+        // Initialize security entity 
         std::string security;
         std::string certificate;
         std::string certificate_key; 
@@ -143,19 +128,20 @@ ItsApp::ItsApp() : Node("its_app_node")
         this->get_parameter("certificate", certificate);
         this->get_parameter("certificate-key", certificate_key);
         this->get_parameter("certificate-chain", certificate_chain);
-        security_params security_params = {security, certificate, certificate_key, certificate_chain};
-
+        SecurityParams security_params = {security, certificate, certificate_key, certificate_chain};
         auto security_entity = create_security_entity(trigger.runtime(), security_params, *position_provider);
         if (security_entity) {
             mib.itsGnSecurity = true;
         }
-
+        
+        // Initialize router context
         RouterContext context(mib, trigger, *position_provider, security_entity.get());
         bool is_require_position_fix;
         this->get_parameter("require-gnss-fix", is_require_position_fix);
         context.require_position_fix(is_require_position_fix);
         context.set_link_layer(link_layer.get());
-        
+
+        // Initialize ITS applications 
         bool is_print_rx;
         this->get_parameter("print-rx", is_print_rx);
         std::map<std::string, std::unique_ptr<Application>> apps;
@@ -168,7 +154,7 @@ ItsApp::ItsApp() : Node("its_app_node")
             }
             if (app_name == "ca") {
                 std::unique_ptr<CamApplication> ca {
-                    new CamApplication()
+                    new CamApplication(cam_publisher)
                 };
                 ca->print_received_message(is_print_rx);
                 apps.emplace(app_name, std::move(ca));
@@ -203,7 +189,8 @@ ItsApp::ItsApp() : Node("its_app_node")
             std::cout << "Enable application '" << app.first << "'...\n";
             context.enable(app.second.get());
         }
-
+        
+        // Start io_service
         io_service.run();
     } catch (PositioningException& e) {
         std::cerr << "Exit because of positioning error: " << e.what() << std::endl;

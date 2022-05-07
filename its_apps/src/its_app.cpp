@@ -60,7 +60,7 @@ ItsApp::ItsApp() : Node("its_apps_node")
     this->declare_parameter<std::string>("security", "dummy");
     this->declare_parameter<std::string>("certificate", "");
     this->declare_parameter<std::string>("certificate-key", "");
-    this->declare_parameter<std::vector<std::string>>("certificate-chain", {});
+    this->declare_parameter<std::vector<std::string>>("certificate-chain", std::vector<std::string>{});
 #ifdef ITS_APPS_WITH_GPSD
     this->declare_parameter<std::string>("gpsd_host", gpsd::shared_memory);
     this->declare_parameter<std::string>("gpsd_port", gpsd::default_port);

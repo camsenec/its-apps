@@ -57,13 +57,14 @@ void CamApplication::indicate(const DataIndication& indication, UpPacketPtr pack
     std::shared_ptr<const vanetzaExtension::asn1::Cam> cam = boost::apply_visitor(visitor, *packet);
 
     std::cout << "CAM application received a packet with " << (cam ? "decodable" : "broken") << " content" << std::endl;
+    this->publish(*cam);
     if (cam && print_rx_msg_) {
         std::cout << "Received CAM contains\n";
         vanetzaExtension::facilities::cam::print_indented(std::cout, *cam, "  ", 1);
     }
 }
 
-void CamApplication::publish(vanetzaExtension::asn1::Cam& cam){
+void CamApplication::publish(const vanetzaExtension::asn1::Cam& cam){
     auto message = its_apps_interfaces::msg::Cam();
     vanetzaExtension::facilities::cam::get_basic_info(cam, message);
     publisher_->publish(message);

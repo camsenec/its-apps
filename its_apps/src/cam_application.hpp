@@ -38,10 +38,11 @@ public:
     explicit CamApplication(rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr);
     PortType port() override;
     void indicate(const DataIndication&, UpPacketPtr) override;
-    void publish(vanetzaExtension::asn1::Cam&);
     void print_received_message(bool flag);
 
 private:
+    void publish(const vanetzaExtension::asn1::Cam&);
+    
     bool print_rx_msg_ = false;
     rclcpp::Publisher<its_apps_interfaces::msg::Cam>::SharedPtr publisher_;
 

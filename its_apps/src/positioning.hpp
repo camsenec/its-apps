@@ -39,7 +39,7 @@ class PositioningException : public std::runtime_error
     using std::runtime_error::runtime_error;
 };
 
-struct position_params {
+struct PositionParams {
     std::string positioning;
     double latitude;
     double longitude;
@@ -49,7 +49,7 @@ struct position_params {
 };
 
 std::unique_ptr<vanetza::PositionProvider>
-create_position_provider(boost::asio::io_service&, const position_params&, const vanetza::Runtime&);
+create_position_provider(boost::asio::io_service&, const PositionParams&, const vanetza::Runtime&);
 
 
 #endif /* POSITIONING_HPP_VZRIW7PB */

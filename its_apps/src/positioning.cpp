@@ -26,7 +26,7 @@
 #include <vanetza/common/stored_position_provider.hpp>
 #include <map>
 
-#ifdef SOCKTAP_WITH_GPSD
+#ifdef ITS_APPS_WITH_GPSD
 #   include "gps_position_provider.hpp"
 #endif
 
@@ -34,11 +34,11 @@ using namespace vanetza;
 namespace po = boost::program_options;
 
 std::unique_ptr<vanetza::PositionProvider>
-create_position_provider(boost::asio::io_service& io_service, const position_params& params, const Runtime& runtime)
+create_position_provider(boost::asio::io_service& io_service, const PositionParams& params, const Runtime& runtime)
 {   
     std::unique_ptr<vanetza::PositionProvider> positioning;
     if (params.positioning == "gpsd") {
-#ifdef SOCKTAP_WITH_GPSD
+#ifdef ITS_APPS_WITH_GPSD
             positioning.reset(new GpsPositionProvider {
             io_service, params.gpsd_host.get(), params.gpsd_port.get()
         });

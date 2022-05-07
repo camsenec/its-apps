@@ -24,6 +24,8 @@
 #  - Dependent library asn1 is changed to Vanetza-extension::asn1.
 
 
+find_package(its_apps_interfaces REQUIRED)
+
 set(CXX_SOURCES
     functions.cpp
     cam_functions.cpp
@@ -33,8 +35,19 @@ set(CXX_SOURCES
 )
 
 add_vanetza_extension_component(facilities ${CXX_SOURCES})
-target_link_libraries(facilities PUBLIC Boost::date_time Vanetza-extension::asn1 Vanetza::security)
-target_link_libraries(facilities PRIVATE Vanetza::geonet)
+
+target_include_directories(facilities PRIVATE
+    ${its_apps_interfaces_INCLUDE_DIRS}
+)
+
+target_link_libraries(facilities PRIVATE
+    Boost::date_time 
+    Vanetza-extension::asn1 
+    ${its_apps_interfaces_LIBRARIES}
+    Vanetza::geonet 
+    Vanetza::security
+)
+
 
 add_test_subdirectory(tests)
 

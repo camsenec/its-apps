@@ -1,10 +1,11 @@
-# ITS Applications (its-apps)
+# ITS Applications (its_apps)
 Implementations of
 - CA (Cooperative Awareness)
 - DEN (Decentralized Environment Notification)
 - RLT (Road and Lane Topology)
 - TLM (Traffic Light Maneuver)
-on top of ROS.
+
+on top of ROS2.
 
 ## Prerequisites
 - CMake 3.5 or higher

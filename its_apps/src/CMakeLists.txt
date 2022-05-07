@@ -36,10 +36,7 @@ if(NOT TARGET Boost::program_options)
     return()
 endif()
 
-find_package(Threads REQUIRED)
-find_package(rclcpp REQUIRED)
-
-add_executable(its_apps
+add_executable(its_apps_node
     application.cpp
     cam_application.cpp
     denm_application.cpp
@@ -57,32 +54,36 @@ add_executable(its_apps
     udp_link.cpp
 )
 
-target_link_libraries(its_apps
-    PUBLIC Boost::system
+target_include_directories(its_apps_node PRIVATE
+    ${rclcpp_INCLUDE_DIRS}
+    ${its_apps_interfaces_INCLUDE_DIRS}
+)
+
+target_link_libraries(its_apps_node PRIVATE
+    Boost::system
     Boost::program_options 
-    Threads::Threads 
+    Threads::Threads
     Vanetza-extension::vanetza-extension
     Vanetza::vanetza
     ${rclcpp_LIBRARIES}
+    ${its_apps_interfaces_LIBRARIES}
 )
 
-target_include_directories(its_apps PUBLIC /opt/ros/foxy/include)
-
-install(TARGETS its_apps DESTINATION lib/${PROJECT_NAME})
+install(TARGETS its_apps_node DESTINATION lib/${PROJECT_NAME})
 
 option(its_apps_WITH_COHDA_LLC "Use Cohda LLC API for its_apps" ${COHDA_FOUND})
 if(its_apps_WITH_COHDA_LLC)
     find_package(Cohda MODULE REQUIRED)
-    target_compile_definitions(its_apps PUBLIC "its_apps_WITH_COHDA_LLC")
-    target_include_directories(its_apps PUBLIC ${COHDA_INCLUDE_DIRS})
-    target_sources(its_apps PRIVATE cohda.cpp cohda_link.cpp)
+    target_compile_definitions(its_apps_node PUBLIC "its_apps_WITH_COHDA_LLC")
+    target_include_directories(its_apps_node PUBLIC ${COHDA_INCLUDE_DIRS})
+    target_sources(its_apps_node PRIVATE cohda.cpp cohda_link.cpp)
 endif()
 
 find_package(GPS QUIET)
 option(ITS_APPS_WITH_GPSD "Enable gpsd positioning for its_apps" ${GPS_FOUND})
 if(ITS_APPS_WITH_GPSD)
     find_package(GPS REQUIRED)
-    target_compile_definitions(its_apps PUBLIC "its_apps_WITH_GPSD")
-    target_link_libraries(its_apps PUBLIC GPS::GPS)
-    target_sources(its_apps PRIVATE gps_position_provider.cpp)
+    target_compile_definitions(its_apps_node PUBLIC "its_apps_WITH_GPSD")
+    target_link_libraries(its_apps_node PUBLIC GPS::GPS)
+    target_sources(its_apps_node PRIVATE gps_position_provider.cpp)
 endif()

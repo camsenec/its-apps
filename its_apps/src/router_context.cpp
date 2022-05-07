@@ -81,15 +81,9 @@ void RouterContext::indicate(CohesivePacket&& packet, const EthernetHeader& hdr)
 {
     if (hdr.source != mib_.itsGnLocalGnAddr.mid() && hdr.type == access::ethertype::GeoNetworking) {
         std::cout << "received packet from " << hdr.source << " (" << packet.size() << " bytes)\n";
-        auto start = std::chrono::steady_clock::now();
         std::unique_ptr<PacketVariant> up { new PacketVariant(std::move(packet)) };
         trigger_.schedule(); // ensure the clock is up-to-date for the security entity
         router_.indicate(std::move(up), hdr.source, hdr.destination);
-        auto end = std::chrono::steady_clock::now();
-        std::cout<<std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count()<<" nanoseconds"<<std::endl;
-        std::cout<<std::chrono::duration_cast<std::chrono::microseconds>(end-start).count()<< " microseconds" << std::endl;
-        std::cout<<std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()<<" milliseconds"<<std::endl;
-        std::cout<<std::chrono::duration_cast<std::chrono::seconds>(end-start).count()<< " seconds";
         trigger_.schedule(); // schedule packet forwarding
     }
 }

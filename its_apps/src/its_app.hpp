@@ -1,9 +1,6 @@
 /* 
- * This file is modified
- * by Tomoya Tanaka <deepsky2221@gmail.com>
- * from <https://github.com/riebl/vanetza/blob/master/tools/socktap/main.cpp>
- * at 2022-05-06.
- * 
+ * (C) 2022 Tomoya Tanaka <deepsky2221@gmail.com> 
+ *
  * This file is part of its_apps.
  *
  * its_apps is free software: you can redistribute it and/or modify it 
@@ -21,36 +18,16 @@
  * If not, see <https://www.gnu.org/licenses/>. 
  */
 
-/* 
- * State Changes
- * - Options are added.
- * - DEN, MAP and SPAT applications are added.
-*/
 
+#ifndef ITS_APP_HPP
+#define ITS_APP_HPP
 
-#include "ethernet_device.hpp"
-#include "cam_application.hpp"
-#include "denm_application.hpp"
-#include "spatem_application.hpp"
-#include "mapem_application.hpp"
-#include "link_layer.hpp"
-#include "positioning.hpp"
-#include "router_context.hpp"
-#include "security.hpp"
-#include "time_trigger.hpp"
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/signal_set.hpp>
-#include <boost/program_options.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <iostream>
-
-namespace asio = boost::asio;
-namespace gn = vanetza::geonet;
-namespace po = boost::program_options;
-using namespace vanetza;
 
 class ItsApp: public rclcpp::Node
 {   
     public:
         ItsApp();
 };
+
+#endif // ITS_APP_HPP

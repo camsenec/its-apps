@@ -21,8 +21,7 @@ cmake_minimum_required(VERSION 3.5)
 project(its_apps VERSION 0.0.1)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# Vanetza makes extensive use of C++11
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Look up threading library (usually pthread)
@@ -51,9 +50,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(its_apps_interfaces REQUIRED)
 
-set(Boost_COMPONENTS date_time) # used by VanetzaConfig generator
+set(Boost_COMPONENTS date_time) 
 find_package(Boost 1.58 REQUIRED COMPONENTS ${Boost_COMPONENTS})
-# query optional Boost components one by one quietly
 foreach(component IN ITEMS program_options system)
   find_package(Boost 1.58 QUIET COMPONENTS ${component})
   if (Boost_${component}_FOUND)
